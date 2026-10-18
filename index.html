@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XAUUSD Lot Calculator</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --text:#e8e8ea; --muted:#8b90a0; --gold:#d4a73a; --line:#2a2e38; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--text); display:flex; justify-content:center; padding:24px 16px; }
+  .card { width:100%; max-width:420px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  h1 { margin:0 0 4px; font-size:20px; color:var(--gold); }
+  p.sub { margin:0 0 18px; color:var(--muted); font-size:13px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:12px 0 4px; }
+  input { width:100%; padding:10px 12px; font-size:16px; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; }
+  input:focus { outline:none; border-color:var(--gold); }
+  .result { margin-top:20px; border-top:1px solid var(--line); padding-top:14px; }
+  .row { display:flex; justify-content:space-between; padding:6px 0; font-size:15px; }
+  .row b { color:var(--gold); }
+  .note { margin-top:14px; font-size:12px; color:var(--muted); line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>XAUUSD Lot Calculator</h1>
+  <p class="sub">Risk-based position sizing for gold</p>
+
+  <label>Account balance ($)</label>
+  <input id="balance" type="number" value="1000" min="0" step="any">
+
+  <label>Risk per trade (%)</label>
+  <input id="risk" type="number" value="1" min="0" step="any">
+
+  <label>Stop loss distance ($ price move, e.g. 5 = 5.00)</label>
+  <input id="sl" type="number" value="5" min="0" step="any">
+
+  <label>Reward : Risk ratio</label>
+  <input id="rr" type="number" value="2" min="0" step="any">
+
+  <div class="result">
+    <div class="row"><span>Risk amount</span><b id="riskAmt">-</b></div>
+    <div class="row"><span>Lot size</span><b id="lots">-</b></div>
+    <div class="row"><span>Take profit distance</span><b id="tp">-</b></div>
+    <div class="row"><span>Potential profit</span><b id="profit">-</b></div>
+  </div>
+
+  <p class="note">Assumes 1 standard lot = 100 oz (so $1 move = $100 per lot). Check your broker's contract size. Not financial advice.</p>
+</div>
+
+<script>
+  const CONTRACT_OZ = 100;
+  const $ = id => document.getElementById(id);
+
+  function calc() {
+    const balance = parseFloat($("balance").value) || 0;
+    const riskPct = parseFloat($("risk").value) || 0;
+    const sl = parseFloat($("sl").value) || 0;
+    const rr = parseFloat($("rr").value) || 0;
+
+    const riskAmt = balance * riskPct / 100;
+    const lots = sl > 0 ? riskAmt / (sl * CONTRACT_OZ) : 0;
+
+    $("riskAmt").textContent = "$" + riskAmt.toFixed(2);
+    $("lots").textContent = lots.toFixed(2);
+    $("tp").textContent = "$" + (sl * rr).toFixed(2);
+    $("profit").textContent = "$" + (riskAmt * rr).toFixed(2);
+  }
+
+  document.querySelectorAll("input").forEach(i => i.addEventListener("input", calc));
+  calc();
+</script>
+</body>
+</html>
